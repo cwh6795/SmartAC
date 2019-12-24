@@ -1,12 +1,13 @@
 #include <Adafruit_NeoPixel.h>
 
-#define LED_PIN    9
-#define PAN_PIN    3
-
+#define LED_PIN    3
+#define PAN_PIN    5
+#define LED_COUNT 18
 
 
 // Declare our NeoPixel strip object:
 Adafruit_NeoPixel strip(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
+void colorWipe(uint32_t color, int wait);
 // Argument 1 = Number of pixels in NeoPixel strip
 // Argument 2 = Arduino pin number (most are valid)
 // Argument 3 = Pixel type flags, add together as needed:
@@ -20,12 +21,11 @@ Adafruit_NeoPixel strip(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
   
 
 void setup() {
-  pm2008_i2c.begin();
   Serial.begin(9600);
 
-  pinMode(PAN_PIN, OUTPUT)
+  pinMode(PAN_PIN, OUTPUT);
+  pinMode(LED_PIN, OUTPUT);
 
-  display.display();
   delay(2000);
 
   strip.begin();           // INITIALIZE NeoPixel strip object (REQUIRED)
@@ -46,7 +46,6 @@ void loop() {
   colorWipe(strip.Color(255, 0, 0), 50); // Red
   analogWrite(PAN_PIN, 0); // FAN STOP
   delay(1000);
-}
 }
 
 
