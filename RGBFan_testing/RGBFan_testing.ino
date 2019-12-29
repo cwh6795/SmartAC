@@ -26,8 +26,6 @@ void setup() {
   pinMode(PAN_PIN, OUTPUT);
   pinMode(LED_PIN, OUTPUT);
 
-  delay(2000);
-
   strip.begin();           // INITIALIZE NeoPixel strip object (REQUIRED)
   strip.show();            // Turn OFF all pixels ASAP
   strip.setBrightness(50); // Set BRIGHTNESS to about 1/5 (max = 255)
