@@ -7,7 +7,7 @@
 #include <Adafruit_SSD1306.h>
 
 #define LED_PIN    3
-#define PAN_PIN    5
+#define FAN_PIN    5
 #define LED_COUNT 18
 #define BUTTON_A  13
 #define FAN_SPD   42
@@ -16,9 +16,9 @@ int blueTx=10;
 int blueRx=11;
 
 PM2008_I2C pm2008_i2c;
-int p1p0 = 0
-int p2p5 = 0
-int p10p0 = 0
+int p1p0 = 0;
+int p2p5 = 0;
+int p10p0 = 0;
 
 Adafruit_SSD1306 display = Adafruit_SSD1306(128, 32, &Wire);
 
@@ -29,7 +29,7 @@ void theaterChase(uint32_t color, int wait);
 void rainbow(int wait);
 void theaterChaseRainbow(int wait);
 void check_dustval(int p2p5, int p10p0, int *p2p5_val, int *p10p0_val);
-print_dust_lcd(int p2p5, int p10p0, int total_val);
+void print_dust_lcd(int p2p5, int p10p0, int total_val);
 
 
 void setup() {
@@ -37,8 +37,11 @@ void setup() {
   SBlueT.begin(9600);
   pm2008_i2c.begin();
   pm2008_i2c.command();
+  Serial.println("HELLO");
 
-  pinMode(PAN_PIN, OUTPUT);
+  
+
+  pinMode(FAN_PIN, OUTPUT);
   pinMode(LED_PIN, OUTPUT);
 
   strip.begin();           // INITIALIZE NeoPixel strip object (REQUIRED)
@@ -75,23 +78,26 @@ void loop() {
     p1p0 = pm2008_i2c.pm1p0_grimm;
     p2p5 = pm2008_i2c.pm2p5_grimm;
     p10p0 = pm2008_i2c.pm10_grimm;
-
-    int p2p5_val, p10p0_val;
-    check_dustval(p2p5, p10p0, &p2p5_val, &p10p0_val);
-
-    Serial.print("p2p5 : ");
-    Serial.println(p2p5);
-    Serial.print("p10p0 : ");
-    Serial.println(p10p0);
-    Serial.print("p2p5_val : ");
-    Serial.println(p2p5_val);
-    Serial.print("p10p0_val : ");
-    Serial.println(p10p0_val);
-
-    print_dust_lcd(p2p5, p10p0, p2p5_val + p10p0_val);
-    colorWipe(strip.Color((p2p5_val + p10p0_val * 42), 255 - (p2p5_val + p10p0_val * 42), 0), 50);
-    analogWrite(PAN_PIN, PAN_SPD * (p2p5_val + p10p0_val));
   }
+  else {
+    p2p5 = 16; // Test Value
+    p10p0 = 400; // Test Value
+  } // TEST CODE
+  int p2p5_val, p10p0_val;
+  check_dustval(p2p5, p10p0, &p2p5_val, &p10p0_val);
+
+  Serial.print("p2p5 : ");
+  Serial.println(p2p5);
+  Serial.print("p10p0 : ");
+  Serial.println(p10p0);
+  Serial.print("p2p5_val : ");
+  Serial.println(p2p5_val);
+  Serial.print("p10p0_val : ");
+  Serial.println(p10p0_val);
+
+  print_dust_lcd(p2p5, p10p0, p2p5_val + p10p0_val);
+  colorWipe(strip.Color(((p2p5_val + p10p0_val) * 42), 255 - ((p2p5_val + p10p0_val) * 42), 0), 50);
+  analogWrite(FAN_PIN, FAN_SPD * (p2p5_val + p10p0_val));
 }
 
 void colorWipe(uint32_t color, int wait) {
@@ -162,14 +168,14 @@ void check_dustval(int p2p5, int p10p0, int *p2p5_val, int *p10p0_val) {
   else *p10p0_val = 3;
 }
 
-print_dust_lcd(int p2p5, int p10p0, int total_val) {
+void print_dust_lcd(int p2p5, int p10p0, int total_val) {
   display.setCursor(0,0);
-  display.print("PM2.5="); // pm 1.0
+  display.print("PM2.5 : "); // pm 1.0
   display.println(p2p5); // pm 1.0
-  display.setCursor(0,15);
-  display.print("PM10="); // pm 1.0
+  //display.setCursor(0,15);
+  display.print("PM10 :  "); // pm 1.0
   display.println(p10p0); // pm 1.0
-  display.setCursor(0,30);
+  //display.setCursor(0,30);
   if (total_val == 0) 
     display.println("Status = Good");
   else if (total_val <= 2)
