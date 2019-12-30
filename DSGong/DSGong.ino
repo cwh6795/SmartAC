@@ -10,7 +10,8 @@
 #define FAN_PIN    5
 #define LED_COUNT 18
 #define BUTTON_A  13
-#define FAN_SPD   42
+
+int FAN_SPD = 30;
 
 int blueTx=10;
 int blueRx=11;
@@ -19,6 +20,8 @@ PM2008_I2C pm2008_i2c;
 int p1p0 = 0;
 int p2p5 = 0;
 int p10p0 = 0;
+
+int MODE = 1;
 
 Adafruit_SSD1306 display = Adafruit_SSD1306(128, 32, &Wire);
 
@@ -38,8 +41,6 @@ void setup() {
   pm2008_i2c.begin();
   pm2008_i2c.command();
   Serial.println("HELLO");
-
-  
 
   pinMode(FAN_PIN, OUTPUT);
   pinMode(LED_PIN, OUTPUT);
@@ -65,6 +66,22 @@ void setup() {
 }
 
 void loop() {
+  int BTN = digitalRead(BUTTON_A);
+  if (BTN) {
+    if (MODE == 0) {
+      FAN_SPD = 31;
+      MODE += 1;
+    }
+    else if (MODE == 1) {
+      FAN_SPD = 42;
+      MODE += 1;
+    }
+    else if (MODE == 2) {
+      FAN_SPD = 20;
+      MODE -= 2;
+    }
+  }
+  
   display.clearDisplay();
   display.setCursor(0,0); 
   display.display();
@@ -83,6 +100,7 @@ void loop() {
     p2p5 = 16; // Test Value
     p10p0 = 400; // Test Value
   } // TEST CODE
+  
   int p2p5_val, p10p0_val;
   check_dustval(p2p5, p10p0, &p2p5_val, &p10p0_val);
 
@@ -96,7 +114,7 @@ void loop() {
   Serial.println(p10p0_val);
 
   print_dust_lcd(p2p5, p10p0, p2p5_val + p10p0_val);
-  colorWipe(strip.Color(((p2p5_val + p10p0_val) * 42), 255 - ((p2p5_val + p10p0_val) * 42), 0), 50);
+  colorWipe(strip.Color(((p2p5_val + p10p0_val) * FAN_SPD), 255 - ((p2p5_val + p10p0_val) * FAN_SPD), 0), 50 * (1 + MODE));
   analogWrite(FAN_PIN, FAN_SPD * (p2p5_val + p10p0_val));
 }
 
@@ -104,7 +122,7 @@ void colorWipe(uint32_t color, int wait) {
   for(int i=0; i<strip.numPixels(); i++) { // For each pixel in strip...
     strip.setPixelColor(i, color);         //  Set pixel's color (in RAM)
     strip.show();                          //  Update strip to match
-    delay(wait);                           //  Pause for a moment
+    delay(50);                           //  Pause for a moment
   }
 }
 
@@ -172,10 +190,8 @@ void print_dust_lcd(int p2p5, int p10p0, int total_val) {
   display.setCursor(0,0);
   display.print("PM2.5 : "); // pm 1.0
   display.println(p2p5); // pm 1.0
-  //display.setCursor(0,15);
   display.print("PM10 :  "); // pm 1.0
   display.println(p10p0); // pm 1.0
-  //display.setCursor(0,30);
   if (total_val == 0) 
     display.println("Status = Good");
   else if (total_val <= 2)
@@ -184,5 +200,12 @@ void print_dust_lcd(int p2p5, int p10p0, int total_val) {
     display.println("Status = Bad");
   else if (total_val <= 6)
     display.println("Status = Really Bad");
+
+  if (MODE == 0)
+    display.println("MODE : SILENCE");
+  else if (MODE == 1)
+    display.println("MODE : NORMAL");
+  else if (MODE == 2)
+    display.println("MODE : TURBO");
   display.display();
 }

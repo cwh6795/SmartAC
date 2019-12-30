@@ -33,6 +33,7 @@ void setup() {
 }
 
 void loop() {
+  Serial.println("HELLO");
   colorWipe(strip.Color(0, 0, 255), 50); // Blue
   analogWrite(PAN_PIN, 255); // FAN FULL SPEED
   delay(1000);
