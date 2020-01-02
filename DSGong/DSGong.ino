@@ -81,6 +81,10 @@ void loop() {
       MODE -= 2;
     }
   }
+
+  if (Serial.available()) {         
+    btSerial.write(Serial.read());
+  }
   
   display.clearDisplay();
   display.setCursor(0,0); 
